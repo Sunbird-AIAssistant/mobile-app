@@ -60,18 +60,6 @@ export class TeacherSakhiPage implements OnInit, OnTabViewWillEnter {
 
   async handleBackNavigation() {
     let botDuration = Date.now() - this.botStartTimeStamp;
-    if (this.teacherBotMsg.length > 0) {
-      this.teacherBotMsg.forEach((msg: any) => {
-        if (msg.messageType == 'audio') {
-          if(msg.audioRef) {
-            if(msg.audio) {
-              msg.audio.play = false;
-            }
-            msg.audioRef.pause();
-          }
-        }
-      });
-    }
     await this.messageApi.getAllChatMessages(this.config.type).then((res) => {
       let result = { audio: 0, text: 0 };
       if(res.length > 0) {

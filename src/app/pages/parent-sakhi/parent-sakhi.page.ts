@@ -75,44 +75,32 @@ export class ParentSakhiPage implements OnInit, OnTabViewWillEnter {
   }
 
   async handleBackNavigation() {
-      let botDuration = Date.now() - this.botStartTimeStamp;
-      if (this.parentBotMsg.length > 0) {
-        this.parentBotMsg.forEach((msg: any) => {
-          if (msg.messageType == 'audio') {
-            if(msg.audioRef) {
-              if(msg.audio) {
-                msg.audio.play = false;
-              }
-              msg.audioRef.pause();
-            }
+    let botDuration = Date.now() - this.botStartTimeStamp;
+    await this.messageApi.getAllChatMessages(this.config.type).then((res) => {
+      let result = { audio: 0, text: 0 };
+      if(res.length > 0) {
+        console.log('Bot response', res);
+        res.forEach(chat => {
+          if (chat.messageType == 'text') {
+            result.text++;
+          } else if (chat.messageType == 'audio') {
+            result.audio++;
           }
         });
-      }
-      await this.messageApi.getAllChatMessages(this.config.type).then((res) => {
-        let result = { audio: 0, text: 0 };
-        if(res.length > 0) {
-          console.log('Bot response', res);
-          res.forEach(chat => {
-            if (chat.messageType == 'text') {
-              result.text++;
-            } else if (chat.messageType == 'audio') {
-              result.audio++;
-            }
-          });
-          this.cdata = {
-            "audioMessagesCount": result.audio,
-            "textMessagesCount": result.text
-          }
-          this.duration = botDuration/1000;
-        } else {
-          this.cdata = {
-            "audioMessagesCount": result.audio,
-            "textMessagesCount": result.text
-          }
+        this.cdata = {
+          "audioMessagesCount": result.audio,
+          "textMessagesCount": result.text
         }
-      })
-      this.parentBot = false;
-      this.telemetry.generateEndTelemetry('bot', 'end', 'parent-sakhi', 'parent-sakhi', undefined, undefined, undefined, this.duration, this.cdata); 
-      this.router.navigate(['/tabs/home']);
-    }
+        this.duration = botDuration/1000;
+      } else {
+        this.cdata = {
+          "audioMessagesCount": result.audio,
+          "textMessagesCount": result.text
+        }
+      }
+    })
+    this.parentBot = false;
+    this.telemetry.generateEndTelemetry('bot', 'end', 'parent-sakhi', 'parent-sakhi', undefined, undefined, undefined, this.duration, this.cdata); 
+    this.router.navigate(['/tabs/home']);
+  }
 }
